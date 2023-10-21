@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { Request, Response } from 'express';
-import { request } from 'http';
+import jwt, { Secret } from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import 'dotenv/config';
 
 const prisma = new PrismaClient();
 
@@ -109,27 +111,30 @@ export class UserController {
         }
     }
 
-    public login(req: Request, res: Response) {
-        const { email, senha } = req.body;
-
-        try{
-            const user = prisma.user.findUnique({
-                where: {
-                    email: email
-                }
-            })
-
-            if(!user){
-                return res.status(400).json({ message: 'Usuário não encontrado' })
+    public async login(req: Request, res: Response) {
+        try {
+            const { email, password } = req.body;
+      
+            const user = await prisma.user.findUnique({
+              where: { email },
+            });
+      
+            if (!user) {
+              return res.status(401).json({ message: 'Usuário não encontrado' });
             }
-
-            if(user !== senha){
-                return res.status(400).json({ message: 'Senha incorreta' })
+      
+            const passwordMatch = password === user.password;
+            console.log('senhas: ', password, user.password, passwordMatch);
+            
+            if (!passwordMatch) {
+              return res.status(401).json({ message: 'Senha incorreta' });
             }
-
-            return res.status(200).json({ message: 'Usuário logado com sucesso', data: user })
-        } catch(error: any){
-            res.status(400).json({ message: error.message })
+      
+            const token = jwt.sign({ userId: user.id }, process.env.SECRET as Secret);
+      
+            res.status(200).json({ token });
+          } catch (error: any) {
+            res.status(500).json({ message: error.message });
+          }
         }
-    }
 }

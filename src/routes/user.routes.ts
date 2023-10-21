@@ -1,22 +1,23 @@
 import { Router } from 'express';
 import { UserController } from '../controllers/user.controller';
 import { validateLogin, validateRegister } from '../middlewares/validateData';
+import { auth } from '../middlewares/Auth';
 
 export function userRoutes(){
     const router = Router();
     const controller = new UserController();
 
     router.route('/')
-    .get(controller.buscarTodos)
+    .get(auth, controller.buscarTodos)
     .post(controller.cadastrar)
 
     router.route('/:id')
-    .get(controller.buscarPorId)
-    .put(controller.alterar)
-    .delete(controller.excluir)
+    .get(auth, controller.buscarPorId)
+    .put(auth, controller.alterar)
+    .delete(auth, controller.excluir)
 
     router.route('/login')
-    .post(validateLogin, controller.login)
+    .post(controller.login)
 
     return router;
 }

@@ -1,29 +1,30 @@
-import jwt from 'jsonwebtoken';
-import { User } from '@prisma/client';
+import jwt, {Secret} from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import 'dotenv/config';
+import { User } from '@prisma/client';
 
-interface AuthenticatedRequest extends Request {
-  user: User;
+declare global {
+    namespace Express {
+        interface Request {
+            user: User
+        }
+    }
 }
 
-function auth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+export function auth(req: Request, res: Response, next: NextFunction) {
   const token = req.header('Authorization');
-  const secret = process.env.SECRET;
-  console.log(secret)
+  console.log(token);
 
   if (!token) {
     return res.status(401).json({ message: 'Token não fornecido' });
   }
 
-  jwt.verify(token, 'secret', (err: any, user: any) => {
+  jwt.verify(token, process.env.SECRET as Secret, (err: any, user: any) => {
     if (err) {
       return res.status(403).json({ message: 'Token inválido' });
     }
 
-    req.user = user;
+    req.user = user; // Adicione o usuário autenticado à solicitação
     next();
   });
 }
-
-export { auth };
