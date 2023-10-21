@@ -1,0 +1,71 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url = env("DATABASE_URL")
+}
+
+model User {
+    id              String   @id @default(uuid()) @db.Uuid
+    name            String   @db.VarChar(255)
+    email           String   @db.VarChar(255) @unique
+    user_name       String   @db.VarChar(255) @unique
+    password        String   @db.VarChar(255)
+    followers       follower[]
+    following       following[]
+    tweets          tweet[]
+    likes           like[]
+    createdAt       DateTime @default(now()) @map("created_at")
+    updatedAt       DateTime @updatedAt @map("updated_at")
+
+}
+
+model follower{
+    id              String  @id @default(uuid()) @db.Uuid
+    follower        User @relation(fields: [follower_id], references: [id])
+    follower_id     String  @map("uuid") @db.Uuid
+    createdAt       DateTime @default(now()) @map("created_at")
+    updatedAt       DateTime @updatedAt @map("updated_at")
+
+
+}
+
+model following {
+    id              String  @id @default(uuid()) @db.Uuid
+    following       User @relation(fields: [following_id], references: [id])
+    following_id    String @map("uuid") @db.Uuid
+    createdAt       DateTime @default(now()) @map("created_at")
+    updatedAt       DateTime @updatedAt @map("updated_at")
+}
+
+model tweet {
+    id              String   @id @default(uuid()) @db.Uuid
+    author_id       String   @db.Uuid
+    content         String
+    type            String   @db.VarChar(20)
+    createdAt       DateTime @default(now()) @map("created_at")
+    updatedAt       DateTime @updatedAt @map("updated_at")
+    retweets        retweet[]
+    likes           like[]
+
+    author          User @relation(fields: [author_id], references: [id])
+}
+
+model retweet{
+    id              String    @id @default(uuid()) @db.Uuid
+    tweet_id        String    @db.Uuid
+    user_id         String    @db.Uuid
+
+    tweet           tweet     @relation(fields: [tweet_id], references: [id])
+}
+
+model like {
+    id              String    @id @default(uuid()) @db.Uuid
+    tweet_id        String    @db.Uuid
+    user_id         String    @db.Uuid
+
+    tweet           tweet     @relation(fields: [tweet_id], references: [id])
+    user            User      @relation(fields: [user_id], references: [id])
+}
