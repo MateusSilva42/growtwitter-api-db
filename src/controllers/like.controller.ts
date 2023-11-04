@@ -26,17 +26,40 @@ export class LikeController {
     try {
       const idTweet = req.params.tweetId;
       const idUsuario = req.body.user_id;
+      let liked = false;
 
-      const like = await prisma.like.create({
-        data: {
-          tweet: { connect: { id: String(idTweet) } },
-          user: { connect: { id: String(idUsuario) } },
+      console.log(idTweet, idUsuario);
+      
+
+      const alreadyLiked: Array<object> = await prisma.like.findMany({
+        where: {
+          tweet_id: idTweet,
+          user_id: idUsuario,
         },
       });
 
+      if (alreadyLiked.length > 0) {
+          await prisma.like.deleteMany({
+          where: {
+              tweet_id: idTweet,
+              user_id: idUsuario,
+          },
+        });
+        liked = false;
+      } else {
+          await prisma.like.create({
+          data: {
+            tweet: { connect: { id: String(idTweet) } },
+            user: { connect: { id: String(idUsuario) } },
+          },
+        });
+        liked = true;
+      }
+      
+
       return res
         .status(201)
-        .json({ message: "Like criado com sucesso", data: like });
+        .json({ message: "Like criado com sucesso", data: liked });
     } catch (error: any) {
       console.log(error);
 
@@ -44,23 +67,4 @@ export class LikeController {
     }
   }
 
-  public async dislike(req: Request, res: Response) {
-    try {
-      const idTweet = req.params.tweetId;
-      const idUsuario = req.body.user_id;
-
-      const dislike = await prisma.like.deleteMany({
-        where: {
-            tweet_id: idTweet,
-            user_id: idUsuario,
-        },
-      });
-
-      return res
-        .status(200)
-        .json({ message: "Like excluído com sucesso", data: dislike });
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
-    }
-  }
 }

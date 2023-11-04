@@ -14,6 +14,27 @@ export class UserController {
             const email = req.body.email;
             const senha = req.body.password;
 
+            if(!nome || !userName || !email || !senha){
+                return res.status(400).json({ message: 'Preencha todos os campos' })
+            }
+
+            const userAlreadyExists = await prisma.user.findMany({
+                where: {
+                    OR: [
+                        {
+                          email: email,
+                        },
+                        {
+                          user_name: userName,
+                        },
+                      ],
+                }
+            })
+
+            if(userAlreadyExists.length > 0){
+                return res.status(400).json({ message: 'Usuário já existe' })
+            }
+
             const userData = {
                 name: nome,
                 email: email,
@@ -46,10 +67,6 @@ export class UserController {
                 }
             })
 
-            console.log('dados do usuario: ', currentUser?.name, currentUser?.user_name, currentUser?.email, currentUser?.password)
-            console.log('dados recebidos: ', nome, userName, email, senha);
-            
-            
             const updateUser = await prisma.user.update({
                 where: {
                     id: String(id)
@@ -124,15 +141,15 @@ export class UserController {
             }
       
             const passwordMatch = password === user.password;
-            console.log('senhas: ', password, user.password, passwordMatch);
             
             if (!passwordMatch) {
               return res.status(401).json({ message: 'Senha incorreta' });
             }
       
             const token = jwt.sign({ userId: user.id }, process.env.SECRET as Secret);
+            
       
-            res.status(200).json({ token });
+            res.status(200).json({ token, user });
           } catch (error: any) {
             res.status(500).json({ message: error.message });
           }

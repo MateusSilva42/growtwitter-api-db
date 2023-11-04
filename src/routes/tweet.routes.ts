@@ -6,7 +6,10 @@ export function tweetRoutes(){
     const router = Router();
     const controller = new TweetController();
 
-    router.get('/', auth, controller.buscarTodos)
+    router
+    .get('/', auth, controller.buscarTodos)
+    .get('/:id', auth, controller.buscarPorUser)
+
     router.post('/', auth, controller.cadastrar)
     router.delete('/:id',auth, controller.excluir)
 

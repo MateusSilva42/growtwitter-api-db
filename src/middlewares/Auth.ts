@@ -13,7 +13,6 @@ declare global {
 
 export function auth(req: Request, res: Response, next: NextFunction) {
   const token = req.header('Authorization');
-  console.log(token);
 
   if (!token) {
     return res.status(401).json({ message: 'Token não fornecido' });
