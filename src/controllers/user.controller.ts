@@ -146,10 +146,9 @@ export class UserController {
               return res.status(401).json({ message: 'Senha incorreta' });
             }
       
-            const token = jwt.sign({ userId: user.id }, process.env.SECRET as Secret);
-            
+            const token = jwt.sign({ userId: user.id, name: user.name, email: user.email, user_name: user.user_name }, process.env.SECRET as Secret);
       
-            res.status(200).json({ token, user });
+            res.status(200).json({ token });
           } catch (error: any) {
             res.status(500).json({ message: error.message });
           }

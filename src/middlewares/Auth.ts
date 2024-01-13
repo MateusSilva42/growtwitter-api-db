@@ -23,7 +23,7 @@ export function auth(req: Request, res: Response, next: NextFunction) {
       return res.status(403).json({ message: 'Token inválido' });
     }
 
-    req.user = user; // Adicione o usuário autenticado à solicitação
+    req.user = user;
     next();
   });
 }
