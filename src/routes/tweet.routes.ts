@@ -7,8 +7,8 @@ export function tweetRoutes(){
     const controller = new TweetController();
 
     router
-    .get('/', auth, controller.buscarTodos)
     .get('/:id', auth, controller.buscarPorUser)
+    .get('/feed/:id', auth, controller.buscarFeed)
 
     router.post('/', auth, controller.cadastrar)
     router.delete('/:id',auth, controller.excluir)

@@ -5,14 +5,22 @@ const prisma = new PrismaClient();
 
 export class FollowerController {
     public async follow(req: Request, res: Response) {
-        const { idUsuario } = req.body.idUser;
-        const { idSeguidor } = req.body.idFollower;
+        const idUsuario = req.body.idUser;
+        const idSeguidor = req.body.idFollower;
 
         try {
             const newFollow = await prisma.user_follower.create({
                 data: {
-                    user_id: idUsuario,
-                    follower_id: idSeguidor,
+                    user: {
+                        connect: {
+                            id: idUsuario,
+                        },
+                    },
+                    follower: {
+                        connect: {
+                            id: idSeguidor,
+                        },
+                    },
                 },
             });
 

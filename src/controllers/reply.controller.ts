@@ -13,8 +13,16 @@ export class ReplyController {
             const newReply = await prisma.reply.create({
                 data: {
                     content: conteudo,
-                    author_id: user_id,
-                    tweet_id: tweet_id,
+                    author: {
+                        connect: {
+                            id: user_id,
+                        },
+                    },
+                    tweet: {
+                        connect: {
+                            id: tweet_id,
+                        },
+                    },
                 },
             });
 
@@ -25,7 +33,7 @@ export class ReplyController {
     }
 
     public async getReplies(req: Request, res: Response) {
-        const { idTweet } = req.params;
+        const { tweet_id } = req.params;
 
         try {
             const replies = await prisma.reply.findMany({

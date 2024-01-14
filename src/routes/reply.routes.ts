@@ -7,10 +7,10 @@ export function replyRoutes(){
     const controller = new ReplyController();
 
     router
-    .get('/', auth, controller.getReplies)
+    .get('/:tweet_id', auth, controller.getReplies)
 
-    router.post('/', auth, controller.createReply)
-    router.delete('/:id',auth, controller.deleteReply)
+    router.post('/:tweet_id', auth, controller.createReply)
+    router.delete('/:tweet_id',auth, controller.deleteReply)
 
     return router;
 }

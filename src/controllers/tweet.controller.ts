@@ -24,24 +24,41 @@ export class TweetController {
             }
         }
 
-        public async buscarTodos(req: Request, res: Response) {
+        public async buscarFeed(req: Request, res: Response) {
         const { id } = req.params;
         
         try {
-            let dateStart:string = ''
+            const followedUsers = await prisma.user_follower.findMany({
+                where: {
+                    follower_id: id,
+                },
+                select: {
+                    user_id: true,
+                },
+            });
+
+            const followedUserIds = followedUsers.map(user => user.user_id);
+
+            followedUserIds.push(id);
+
             const tweets = await prisma.tweet.findMany({
+                where: {
+                    author_id: {
+                        in: followedUserIds,
+                    },
+                },
                 include: {
                     author: {
                         select: {
                             name: true,
                             user_name: true,
-                        }
+                        },
                     },
                     likes: true,
                 },
                 orderBy: {
                     createdAt: 'desc',
-                }
+                },
             });
 
             return res.status(200).json({ message: 'Tweets encontrados com sucesso', data: tweets });
