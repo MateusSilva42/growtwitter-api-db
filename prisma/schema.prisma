@@ -14,9 +14,12 @@ model User {
     user_name       String   @db.VarChar(255) @unique
     password        String   @db.VarChar(255)
     tweets          tweet[]
+    replies         reply[]
     likes           like[]
     createdAt       DateTime @default(now()) @map("created_at")
     updatedAt       DateTime @updatedAt @map("updated_at")
+    following       user_follower[] @relation("UserFollowers")
+    followers       user_follower[] @relation("FollowerUsers")
 }
 
 model user_follower{
@@ -26,6 +29,8 @@ model user_follower{
     updatedAt       DateTime @updatedAt @map("updated_at")
 
     @@id([user_id, follower_id])
+    user            User @relation("UserFollowers", fields: [user_id], references: [id])
+    follower        User @relation("FollowerUsers", fields: [follower_id], references: [id])
 }
 
 model tweet {
@@ -36,6 +41,7 @@ model tweet {
     createdAt       DateTime @default(now()) @map("created_at")
     updatedAt       DateTime @updatedAt @map("updated_at")
     likes           like[]
+    replies         reply[]
 
     author          User @relation(fields: [author_id], references: [id])
 }
@@ -44,15 +50,22 @@ model reply {
     id              String   @id @default(uuid()) @db.Uuid
     tweet_id        String   @db.Uuid
     author_id       String   @db.Uuid
+    
     content         String
     createdAt       DateTime @default(now()) @map("created_at")
+
+    author          User @relation(fields: [author_id], references: [id])
+    tweet           tweet     @relation(fields: [tweet_id], references: [id])
+    likes           like[]
 }
 
 model like {
-    id              String    @id @default(uuid()) @db.Uuid
-    tweet_id        String    @db.Uuid
-    user_id         String    @db.Uuid
+    id              String   @id @default(uuid()) @db.Uuid
+    user_id         String  @db.Uuid
+    tweet_id        String? @db.Uuid
+    reply_id        String? @db.Uuid
 
-    tweet           tweet     @relation(fields: [tweet_id], references: [id])
-    user            User      @relation(fields: [user_id], references: [id])
+    user            User @relation(fields: [user_id], references: [id])
+    tweet           tweet?    @relation(fields: [tweet_id], references: [id])
+    reply           reply?    @relation(fields: [reply_id], references: [id])
 }
